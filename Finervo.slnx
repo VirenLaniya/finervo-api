@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Finervo.API/Finervo.API.csproj" />
+  <Project Path="Finervo.Application/Finervo.Application.csproj" />
+  <Project Path="Finervo.Contracts/Finervo.Contracts.csproj" Id="3eb18801-c8cd-42fb-8596-4d5fb0f52ead" />
+  <Project Path="Finervo.Core/Finervo.Core.csproj" />
+  <Project Path="Finervo.Infrastructure/Finervo.Infrastructure.csproj" />
+</Solution>
