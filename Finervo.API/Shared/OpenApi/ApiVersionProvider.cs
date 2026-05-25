@@ -5,7 +5,7 @@
         private const string _defaultApiVersion = ApiVersions.V2;
 
         public static IReadOnlyList<ApiVersionInfo> _versions = [
-            new(GroupName: ApiVersions.V1, Title: "Finervo API", Version: ApiVersions.Numeric.V1, Description: "Finervo Initial Release", Deprecated: true),
+            new(GroupName: ApiVersions.V1, Title: "Finervo API", Version: ApiVersions.Numeric.V1, Description: "Finervo Initial Release", Deprecated: false),
             new(GroupName: ApiVersions.V2, Title: "Finervo API - Version 2", Version: ApiVersions.Numeric.V2, Description: "Finervo API Version 2 Release", Deprecated: false)
         ];
 

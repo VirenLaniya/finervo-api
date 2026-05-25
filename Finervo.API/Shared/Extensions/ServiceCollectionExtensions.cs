@@ -9,6 +9,7 @@ namespace Finervo.API.Shared.Extensions
         public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
         {
             services
+                .AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly))
                 .AddContracts()
                 .AddApplication()
                 .AddInfrastructure()
