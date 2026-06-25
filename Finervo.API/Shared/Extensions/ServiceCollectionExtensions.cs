@@ -12,7 +12,7 @@ namespace Finervo.API.Shared.Extensions
                 .AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(Program).Assembly))
                 .AddContracts()
                 .AddApplication()
-                .AddInfrastructure()
+                .AddInfrastructure(configuration)
                 .AddApiVersioningSetup()   // Api Versioning Configuration Extenstion
                 .AddOpenApiWithVersions();  // OpenAPI with Versioning for Documentation
 

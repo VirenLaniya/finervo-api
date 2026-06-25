@@ -1,5 +1,4 @@
-﻿using Finervo.Core.Storage;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
 namespace Finervo.Core
 {
@@ -7,8 +6,6 @@ namespace Finervo.Core
     {
         public static IServiceCollection AddCore(this IServiceCollection services)
         {
-            services.AddSingleton<TempStorage>();
-
             return services;
         }
     }

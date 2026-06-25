@@ -1,0 +1,8 @@
+# Add migration only
+.\tools\ef-migrate.ps1 -MigrationName "AddUserTable"
+
+# Add migration AND update database
+.\tools\ef-migrate.ps1 -MigrationName "AddUserTable" -UpdateDatabase
+
+# Scaffold from existing database
+.\tools\ef-migrate.ps1 -MigrationName "unused" -Scaffold

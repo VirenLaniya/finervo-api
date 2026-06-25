@@ -5,10 +5,8 @@ using System.Text;
 
 namespace Finervo.Core.Interfaces
 {
-    public interface IWeatherForecastRepository
+    public interface IUserRepository : IGenericRepository<User>
     {
-        IEnumerable<WeatherForecast> GetAll();
-
-        void AddSummary(string summary);
+        Task<User?> GetUserByEmail(string email);
     }
 }
