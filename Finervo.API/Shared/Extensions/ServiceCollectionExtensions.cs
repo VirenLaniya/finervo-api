@@ -13,7 +13,8 @@ namespace Finervo.API.Shared.Extensions
                 .AddApplication()
                 .AddInfrastructure(configuration)
                 .AddApiVersioningSetup()   // Api Versioning Configuration Extenstion
-                .AddOpenApiWithVersions();  // OpenAPI with Versioning for Documentation
+                .AddOpenApiWithVersions()  // OpenAPI with Versioning for Documentation
+                .ConfigureModelBindingErrors();
 
             return services;
         }

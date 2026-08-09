@@ -8,7 +8,5 @@ using System.Text;
 
 namespace Finervo.Application.Features.User.Queries.GetUsers
 {
-    public sealed record GetUsersQuery : IRequest<Result<IEnumerable<UserResponseDto>>>
-    {
-    }
+    public sealed record GetUsersQuery : IRequest<Result<IEnumerable<UserResponseDto>>>;
 }

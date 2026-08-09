@@ -7,13 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Finervo.Contracts\Finervo.Contracts.csproj" />
     <ProjectReference Include="..\Finervo.Core\Finervo.Core.csproj" />
+    <ProjectReference Include="..\Finervo.Shared\Finervo.Shared.csproj" />
   </ItemGroup>
 
 </Project>

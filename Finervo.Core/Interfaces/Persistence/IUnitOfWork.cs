@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Finervo.Core.Interfaces
+﻿
+namespace Finervo.Core.Interfaces.Persistence
 {
     public interface IUnitOfWork
     {

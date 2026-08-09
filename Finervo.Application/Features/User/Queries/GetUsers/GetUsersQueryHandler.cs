@@ -1,15 +1,11 @@
 ﻿using Finervo.Contracts.Responses.User;
-using Finervo.Core.Entities;
-using Finervo.Core.Interfaces;
+using Finervo.Core.Interfaces.Repositories;
 using Finervo.Core.Primitives;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Finervo.Application.Features.User.Queries.GetUsers
 {
-    public class GetUsersHandler(IUserRepository userRepository) : IRequestHandler<GetUsersQuery, Result<IEnumerable<UserResponseDto>>>
+    public class GetUsersQueryHandler(IUserRepository userRepository) : IRequestHandler<GetUsersQuery, Result<IEnumerable<UserResponseDto>>>
     {
         public async Task<Result<IEnumerable<UserResponseDto>>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
@@ -17,7 +13,7 @@ namespace Finervo.Application.Features.User.Queries.GetUsers
             {
                 IEnumerable<Core.Entities.User> users = await userRepository.GetAllAsync();
 
-                List<UserResponseDto> userResponseDtos = users.Select(u => new UserResponseDto
+                List<UserResponseDto> userResponseDtos = [.. users.Select(u => new UserResponseDto
                 {
                     Id = u.Id,
                     FirstName = u.FirstName,
@@ -26,7 +22,7 @@ namespace Finervo.Application.Features.User.Queries.GetUsers
                     UserName = u.UserName,
                     CreatedAt = u.CreatedAt,
                     LastUpdatedAt = u.LastUpdatedAt,
-                }).ToList();
+                })];
 
                 return Result<IEnumerable<UserResponseDto>>.Success(userResponseDtos);
             }

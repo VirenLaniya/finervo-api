@@ -4,4 +4,5 @@
   <Project Path="Finervo.Contracts/Finervo.Contracts.csproj" Id="3eb18801-c8cd-42fb-8596-4d5fb0f52ead" />
   <Project Path="Finervo.Core/Finervo.Core.csproj" />
   <Project Path="Finervo.Infrastructure/Finervo.Infrastructure.csproj" />
+  <Project Path="Finervo.Shared/Finervo.Shared.csproj" Id="cb52d223-2676-486c-8bbe-d578f7447f48" />
 </Solution>

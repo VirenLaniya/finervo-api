@@ -6,9 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Finervo.Application.Features.User.Commands.UpdateUser
+namespace Finervo.Application.Features.User.Commands.DeleteUser
 {
-    public sealed record DeleteUserCommand(int Id) : IRequest<Result<UserResponseDto>>
-    {
-    }
+    public sealed record DeleteUserCommand(Guid Id) : IRequest<Result<UserResponseDto>>;
 }

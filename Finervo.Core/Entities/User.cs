@@ -1,33 +1,61 @@
-﻿using Finervo.Core.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Finervo.Core.Events;
+using Finervo.Core.Primitives;
 
 namespace Finervo.Core.Entities
 {
-    public class User
+    public class User : AggregateRoot
     {
-        public int Id { get; set; }
-        public string FirstName { get; set; } = null!;
-        public string LastName { get; set; } = null!;
-        public string UserName { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string Password { get; set; } = null!;
-        public DateTime CreatedAt { get; set; }
-        public DateTime LastUpdatedAt { get; set; }
+        #region Fields
+
+        public string FirstName { get; private set; } = null!;
+        public string LastName { get; private set; } = null!;
+        public string UserName { get; private set; } = null!;
+        public string Email { get; private set; } = null!;
+        public string Password { get; private set; } = null!;
+        public DateTime CreatedAt { get; private set; }
+        public DateTime LastUpdatedAt { get; private set; }
+
+        // Auth fields
+        public string? RefreshToken { get; private set; }
+        public DateTime? RefreshTokenExpiryTime { get; private set; }
+
+        #endregion
+
+        #region Contructor
+        private User(Guid id, string firstName, string lastName, string userName, string email, string password) : base(id)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            UserName = userName;
+            Email = email;
+            Password = password;
+            CreatedAt = DateTime.UtcNow;
+            LastUpdatedAt = DateTime.UtcNow;
+            RefreshToken = null;
+            RefreshTokenExpiryTime = null;
+        }
+        #endregion
+
+        #region Methods
+        public static Result<User> Create(string firstName,
+            string lastName,
+            string email,
+            string userName,
+            string passwordHash)
+        {
+            var user = new User(Guid.NewGuid(), firstName, lastName, userName, email, passwordHash);
+
+            user.RaiseDomainEvent(new UserRegisteredDomainEvent(user.Id, user.Email));
+
+            return Result<User>.Success(user);
+        }
 
         public Result UpdateProfile(
-        string firstName,
-        string lastName,
-        string email,
-        string userName)
+            string firstName,
+            string lastName,
+            string email,
+            string userName)
         {
-            if (string.IsNullOrWhiteSpace(firstName))
-                return Result.Failure(new Error("User.InvalidFirstName", "Invalid First Name."));
-
-            if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
-                return Result.Failure(new Error("User.InvalidEmail", "Invalid Email."));
-
             FirstName = firstName;
             LastName = lastName;
             Email = email;
@@ -36,5 +64,18 @@ namespace Finervo.Core.Entities
 
             return Result.Success();
         }
+
+        public void SetRefreshToken(string refreshToken, DateTime expiryTime)
+        {
+            RefreshToken = refreshToken;
+            RefreshTokenExpiryTime = expiryTime;
+        }
+
+        public void CleanRefreshToken()
+        {
+            RefreshToken = null;
+            RefreshTokenExpiryTime = null;
+        }
+        #endregion
     }
 }

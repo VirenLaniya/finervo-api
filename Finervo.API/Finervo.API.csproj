@@ -18,6 +18,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.OpenApi" Version="2.11.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
   </ItemGroup>
@@ -30,6 +31,7 @@
     <ProjectReference Include="..\Finervo.Application\Finervo.Application.csproj" />
     <ProjectReference Include="..\Finervo.Contracts\Finervo.Contracts.csproj" />
     <ProjectReference Include="..\Finervo.Infrastructure\Finervo.Infrastructure.csproj" />
+    <ProjectReference Include="..\Finervo.Shared\Finervo.Shared.csproj" />
   </ItemGroup>
 
 </Project>

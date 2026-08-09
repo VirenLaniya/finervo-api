@@ -4,5 +4,5 @@ using System.Text;
 
 namespace Finervo.Contracts.Requests.User
 {
-    public sealed record UpdateUserRequestDto(int Id, string FirstName, string LastName, string UserName, string Email);
+    public sealed record UpdateUserRequestDto(string FirstName, string LastName, string UserName, string Email);
 }

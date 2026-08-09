@@ -32,6 +32,46 @@ namespace Finervo.API.Shared.Extensions
                             Description = version.Deprecated ? $"[DEPRECATED] {version.Description}" : version.Description
                         };
 
+                        document.Components ??= new OpenApiComponents();
+
+                        document.Components.SecuritySchemes = new Dictionary<string, IOpenApiSecurityScheme>
+                        {
+                            // Define Bearer scheme
+                            {
+                                "Bearer",
+                                new OpenApiSecurityScheme
+                                {
+                                    Type = SecuritySchemeType.Http,
+                                    Scheme = "bearer",
+                                    BearerFormat = "JWT",
+                                    In = ParameterLocation.Header,
+                                    Name = "Authorization",
+                                    Description = "Enter your JWT access token. Example: eyJhbGci..."
+                                }
+                            }
+                        };
+
+                        // Apply globally to all operations
+                        var securityRequirement = new OpenApiSecurityRequirement
+                            {
+                                {
+                                    new OpenApiSecuritySchemeReference("Bearer", document), 
+                                    new List<string>()
+                                }
+                            };
+
+                        foreach (var path in document.Paths.Values)
+                        {
+                            if(path?.Operations is not null)
+                            {
+                                foreach (var operation in path.Operations.Values)
+                                {
+                                    operation.Security ??= [];
+                                    operation.Security.Add(securityRequirement);
+                                }
+                            }
+                        }
+
                         return Task.CompletedTask;
                     });
                 });
@@ -60,6 +100,12 @@ namespace Finervo.API.Shared.Extensions
                         url: $"/openapi/{version.GroupName}.json",
                         name: $"{version.GroupName} : {version.Title} {(version.Deprecated ? " (Deprecated)" : "")}"
                         );
+
+                    options.DisplayRequestDuration();
+
+                    options.EnableFilter();
+
+                    options.EnableDeepLinking();
                 }
             });
 

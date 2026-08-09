@@ -7,24 +7,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Finervo.Application\Finervo.Application.csproj" />
     <ProjectReference Include="..\Finervo.Core\Finervo.Core.csproj" />
+    <ProjectReference Include="..\Finervo.Shared\Finervo.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Caching\" />
     <Folder Include="BackgroundJobs\" />
-    <Folder Include="Authentication\" />
     <Folder Include="Configuration\" />
+    <Folder Include="Persistence\Migrations\" />
     <Folder Include="Services\" />
   </ItemGroup>
 

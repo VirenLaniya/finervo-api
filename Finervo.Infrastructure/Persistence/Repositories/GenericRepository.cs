@@ -1,4 +1,4 @@
-﻿using Finervo.Core.Interfaces;
+﻿using Finervo.Core.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,14 +23,14 @@ namespace Finervo.Infrastructure.Persistence.Repositories
             context.Set<T>().Remove(entity);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken ct)
         {
-            return await context.Set<T>().ToListAsync();
+            return await context.Set<T>().ToListAsync(ct);
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
-            return await context.Set<T>().FindAsync(id);
+            return await context.Set<T>().FindAsync([id], ct);
         }
     }
 }

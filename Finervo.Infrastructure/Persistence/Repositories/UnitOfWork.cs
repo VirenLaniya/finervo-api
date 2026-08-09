@@ -1,4 +1,4 @@
-﻿using Finervo.Core.Interfaces;
+﻿using Finervo.Core.Interfaces.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Text;

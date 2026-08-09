@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Finervo.Application.Common.Behaviors;
+using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Finervo.Application
 {
@@ -10,7 +12,11 @@ namespace Finervo.Application
             services.AddMediatR(cfg =>
             {
                 cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+                cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             });
+
+            // Scans Application assembly for all validators automatically
+            services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
             return services;
         }
