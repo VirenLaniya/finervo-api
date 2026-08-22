@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning.ApiExplorer;
 using Finervo.API.Shared.OpenApi;
+using Finervo.API.Shared.OpenApi.Transformers;
 using Microsoft.OpenApi;
 using System.Reflection.Metadata;
 
@@ -55,14 +56,14 @@ namespace Finervo.API.Shared.Extensions
                         var securityRequirement = new OpenApiSecurityRequirement
                             {
                                 {
-                                    new OpenApiSecuritySchemeReference("Bearer", document), 
+                                    new OpenApiSecuritySchemeReference("Bearer", document),
                                     new List<string>()
                                 }
                             };
 
                         foreach (var path in document.Paths.Values)
                         {
-                            if(path?.Operations is not null)
+                            if (path?.Operations is not null)
                             {
                                 foreach (var operation in path.Operations.Values)
                                 {
@@ -74,6 +75,8 @@ namespace Finervo.API.Shared.Extensions
 
                         return Task.CompletedTask;
                     });
+
+                    options.AddOperationTransformer<CorrelationIdHeaderTransformer>();
                 });
             }
 

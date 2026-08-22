@@ -6,10 +6,13 @@ using Finervo.Infrastructure.Authentication;
 using Finervo.Infrastructure.Persistence;
 using Finervo.Infrastructure.Persistence.Repositories;
 using Finervo.Infrastructure.Persistence.Security;
+using Finervo.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -17,39 +20,45 @@ namespace Finervo.Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
 
             services
-                .AddDatabase(configuration)
+                .AddDatabase(configuration, environment)
                 .AddAuthenticationServices(configuration)
-                .AddRepositories();
+                .AddRepositories()
+                .AddServices();
 
             return services;
         }
 
-        private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+        private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
             var connectionString = configuration.GetConnectionString("Postgres");
 
             services.AddDbContext<ApplicationDbContext>(options =>
+            {
                 options
-                .UseNpgsql(connectionString, npgsql =>
-                {
-                    // Retry on transient failures
-                    npgsql.EnableRetryOnFailure(
-                        maxRetryCount: 3,
-                        maxRetryDelay: TimeSpan.FromSeconds(10),
-                        errorCodesToAdd: null);
+                    .UseNpgsql(connectionString, npgsql =>
+                    {
+                        // Retry on transient failures
+                        npgsql.EnableRetryOnFailure(
+                            maxRetryCount: 3,
+                            maxRetryDelay: TimeSpan.FromSeconds(10),
+                            errorCodesToAdd: null);
 
-                    // Migration assembly
-                    npgsql.MigrationsAssembly(
-                        typeof(ApplicationDbContext).Assembly.FullName);
-                })
+                        // Migration assembly
+                        npgsql.MigrationsAssembly(
+                            typeof(ApplicationDbContext).Assembly.FullName);
+                    });
                 // Log SQL queries in development
-                .EnableSensitiveDataLogging()
-                .EnableDetailedErrors()
-                );
+                if (environment.IsDevelopment())
+                {
+                    options
+                        .EnableSensitiveDataLogging()
+                        .EnableDetailedErrors();
+                }
+            });
 
             return services;
         }
@@ -95,8 +104,6 @@ namespace Finervo.Infrastructure
             services.AddHttpContextAccessor();  // Gets the access to the current HTTP request's HttpContext, By default it is available in controllers which inherits ControllerBase
 
             services.AddScoped<ITokenService, TokenService>();
-            services.AddScoped<ICurrentUserService, CurrentUserService>();
-            services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPasswordHasher, PasswordHasher>();
 
             return services;
@@ -104,10 +111,18 @@ namespace Finervo.Infrastructure
 
         private static IServiceCollection AddRepositories(this IServiceCollection services)
         {
-            
+
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<IRequestContext, RequestContext>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             return services;
         }

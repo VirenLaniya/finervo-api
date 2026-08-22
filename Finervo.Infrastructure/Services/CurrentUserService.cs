@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace Finervo.Infrastructure.Authentication
+namespace Finervo.Infrastructure.Services
 {
     public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
     {
