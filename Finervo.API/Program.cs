@@ -12,6 +12,8 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    Log.Information("Running in {Environment} environment", builder.Environment.EnvironmentName);
+
     builder.AddLogging();   // Add Finervo Logging
 
     #region Services Configuration

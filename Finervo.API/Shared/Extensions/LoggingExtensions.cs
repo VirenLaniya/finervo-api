@@ -1,4 +1,5 @@
-﻿using Finervo.Shared.Constants;
+﻿using Finervo.Infrastructure.Configuration;
+using Finervo.Shared.Constants;
 using Serilog;
 using System.Security.Claims;
 
@@ -9,10 +10,26 @@ namespace Finervo.API.Shared.Extensions
         public static WebApplicationBuilder AddLogging(this WebApplicationBuilder builder)
         {
             builder.Host.UseSerilog((context, services, configurations) =>
-                configurations
-                    .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services)
-                    .Enrich.FromLogContext()
+                {
+                    configurations
+                        .ReadFrom.Configuration(context.Configuration)
+                        .ReadFrom.Services(services)
+                        //.Enrich.FromLogContext()  // Already configured in appsettings Enrich
+                        //.Enrich.WithMachineName() // Already configured in appsettings Enrich
+                        //.Enrich.WithThreadId()    // Already configured in appsettings Enrich
+                        //.Enrich.WithProcessId()   // Already configured in appsettings Enrich
+                        .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName);
+
+                    var seqOptions = builder.Configuration.GetSection(SeqOptions.SectionName).Get<SeqOptions>();
+
+                    if(seqOptions?.Enabled == true && !String.IsNullOrWhiteSpace(seqOptions.ServerUrl))
+                    {
+                        configurations.WriteTo.Seq(
+                                serverUrl: seqOptions.ServerUrl,
+                                apiKey: string.IsNullOrWhiteSpace(seqOptions.ApiKey) ? null : seqOptions.ApiKey
+                            );
+                    }
+                }
             );
 
             return builder;
