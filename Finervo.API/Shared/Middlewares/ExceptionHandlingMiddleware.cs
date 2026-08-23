@@ -1,7 +1,12 @@
-﻿using Finervo.Core.Errors;
+﻿using Finervo.API.Shared.Helpers;
+using Finervo.API.Shared.Logging;
+using Finervo.Application.Common.Interfaces;
+using Finervo.Core.Errors;
 using Finervo.Core.Primitives;
+using Finervo.Shared.Constants;
 using Finervo.Shared.Extensions;
 using FluentValidation;
+using Serilog.Context;
 using System.Net;
 using System.Net.Mime;
 
@@ -12,7 +17,7 @@ namespace Finervo.API.Shared.Middlewares
     /// Catches <see cref="ValidationException"/> and general <see cref="Exception"/> types,
     /// returning structured JSON error responses instead of exposing raw exception details.
     /// </summary>
-    public class ExceptionHandlingMiddleware(RequestDelegate next)
+    public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
     {
         /// <summary>
         /// Invokes the middleware and processes the HTTP request.
@@ -21,22 +26,32 @@ namespace Finervo.API.Shared.Middlewares
         /// </summary>
         /// <param name="context">The current HTTP context for the request.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IRequestContext requestContext)
         {
-			try
-			{
-                await next(context);
-			}
-			catch (ValidationException ex)
-			{
-                // TO DO : Add logger
-                await HandleValidationExceptionAsync(context, ex);
-			}
-            catch(Exception ex)
+            var correlationId = CorrelationIdHelper.GetOrGenerate(context);
+            var userId = UserIdHelper.GetOrDefault(context);
+
+            requestContext.Initialize(correlationId, userId);
+
+            using (LogContext.PushProperty(LogContextProperties.CorrelationId, correlationId))
+            using (LogContext.PushProperty(LogContextProperties.UserId, userId))
+            using (LogContext.PushProperty(LogContextProperties.RequestPath, context.Request.Path))
+            using (LogContext.PushProperty(LogContextProperties.RequestMethod, context.Request.Method))
             {
-                // TO DO : Add logger
-                Console.WriteLine(ex.Message);
-                await HandleExceptionAsync(context);
+                try
+                {
+                    await next(context);
+                }
+                catch (ValidationException ex)
+                {
+                    ApiLogMessages.ValidationFailed(logger, ex.Errors.Select(e => e.ErrorMessage));
+                    await HandleValidationExceptionAsync(context, ex);
+                }
+                catch (Exception ex)
+                {
+                    ApiLogMessages.UnhandledException(logger, ex.Message, ex);
+                    await HandleExceptionAsync(context);
+                }
             }
         }
 

@@ -6,12 +6,12 @@ namespace Finervo.API.Shared.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
             services
                 .AddContracts()
                 .AddApplication()
-                .AddInfrastructure(configuration)
+                .AddInfrastructure(configuration, environment)
                 .AddApiVersioningSetup()   // Api Versioning Configuration Extenstion
                 .AddOpenApiWithVersions()  // OpenAPI with Versioning for Documentation
                 .ConfigureModelBindingErrors();

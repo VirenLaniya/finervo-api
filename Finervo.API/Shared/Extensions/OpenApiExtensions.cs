@@ -1,4 +1,4 @@
-﻿using Asp.Versioning.ApiExplorer;
+using Asp.Versioning.ApiExplorer;
 using Finervo.API.Shared.OpenApi;
 using Finervo.API.Shared.OpenApi.Transformers;
 using Microsoft.OpenApi;
@@ -37,6 +37,7 @@ namespace Finervo.API.Shared.Extensions
                     });
 
                     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+                    options.AddOperationTransformer<CorrelationIdHeaderTransformer>();
                 });
             }
 
