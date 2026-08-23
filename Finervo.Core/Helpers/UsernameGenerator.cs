@@ -32,9 +32,8 @@ namespace Finervo.Core.Helpers
         }
 
         private static string Sanitize(string value) =>
-            new string(value
+            new([.. value
                 .ToLowerInvariant()
-                .Where(c => char.IsLetterOrDigit(c) || c == '_')
-                .ToArray());
+                .Where(c => char.IsLetterOrDigit(c) || c == '_')]);
     }
 }
