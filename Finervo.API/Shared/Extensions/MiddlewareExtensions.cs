@@ -9,6 +9,7 @@ namespace Finervo.API.Shared.Extensions
             app.UseMiddleware<ExceptionHandlingMiddleware>();
             app.UseMiddleware<RequestContextMiddleware>();
             app.UseRequestLogging();
+            app.UseFinervoHealthChecks();
 
             return app;
         }

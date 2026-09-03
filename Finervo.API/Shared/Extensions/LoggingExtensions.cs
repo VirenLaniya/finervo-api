@@ -1,6 +1,7 @@
 ﻿using Finervo.Infrastructure.Configuration;
 using Finervo.Shared.Constants;
 using Serilog;
+using Serilog.Events;
 using System.Security.Claims;
 
 namespace Finervo.API.Shared.Extensions
@@ -40,6 +41,22 @@ namespace Finervo.API.Shared.Extensions
             app.UseSerilogRequestLogging(options =>
             {
                 options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000}ms";
+
+                options.GetLevel = (httpContext, elapsed, exception) =>
+                {
+                    // Log /health only when it fails; otherwise, use Debug level.
+                    if (httpContext.Request.Path.StartsWithSegments("/health") &&
+                        httpContext.Response.StatusCode < 500 &&
+                        exception is null)
+                    {
+                        return LogEventLevel.Debug;
+                    }
+
+                    return exception != null ||
+                           httpContext.Response.StatusCode >= 500
+                        ? LogEventLevel.Error
+                        : LogEventLevel.Information;
+                };
 
                 options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
                 {
