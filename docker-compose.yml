@@ -18,6 +18,19 @@ services:
       timeout:  5s
       retries:  5
 
+  seq:
+    image: datalust/seq:latest
+    container_name: finervo-seq
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "True"
+    ports:
+      # - "5341:5341" # Ingestion
+      - "8082:80"   # UI
+    volumes:
+      - seq_data:/data
+  
   finervo.api:
     image: finervoapi
     build:
@@ -35,11 +48,17 @@ services:
         Password=${POSTGRES_PASSWORD}
       # JWT secret key
       Jwt__SecretKey: ${JWT_SECRET_KEY}
+      # Seq
+      Seq__ServerUrl: ${SEQ_SERVER_URL}
+      Seq__Enabled: ${SEQ_ENABLED}
     ports:
       - "8080:8080" # host:container - access via http://localhost:8080
     depends_on:
       postgres:
         condition: service_healthy
+      seq:
+        condition: service_started
 
 volumes:
   postgres_data:
+  seq_data:
