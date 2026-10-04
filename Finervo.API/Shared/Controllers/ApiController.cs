@@ -39,7 +39,7 @@ namespace Finervo.API.Shared.Controllers
             }
 
             if (result.IsSuccess)
-                return Ok();
+                return Ok(result);
 
             return HandleErrorResult(result);
         }

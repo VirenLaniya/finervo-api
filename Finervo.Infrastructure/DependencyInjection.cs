@@ -3,6 +3,7 @@ using Finervo.Core.Interfaces.Persistence;
 using Finervo.Core.Interfaces.Repositories;
 using Finervo.Core.Interfaces.Security;
 using Finervo.Infrastructure.Authentication;
+using Finervo.Infrastructure.Configuration;
 using Finervo.Infrastructure.Persistence;
 using Finervo.Infrastructure.Persistence.Repositories;
 using Finervo.Infrastructure.Persistence.Security;
@@ -27,7 +28,8 @@ namespace Finervo.Infrastructure
                 .AddDatabase(configuration, environment)
                 .AddAuthenticationServices(configuration)
                 .AddRepositories()
-                .AddServices();
+                .AddServices()
+                .AddConfigurationOptions();
 
             return services;
         }
@@ -114,6 +116,7 @@ namespace Finervo.Infrastructure
 
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
@@ -123,6 +126,13 @@ namespace Finervo.Infrastructure
         {
             services.AddScoped<IRequestContext, RequestContext>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddConfigurationOptions(this IServiceCollection services)
+        {
+            services.AddOptions<DefaultSuperAdminOptions>().BindConfiguration(DefaultSuperAdminOptions.SectionName).ValidateOnStart();
 
             return services;
         }

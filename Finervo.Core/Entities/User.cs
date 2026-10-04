@@ -1,10 +1,14 @@
-﻿using Finervo.Core.Events;
+﻿using Finervo.Core.Errors;
+using Finervo.Core.Events;
 using Finervo.Core.Primitives;
 
 namespace Finervo.Core.Entities
 {
     public class User : AggregateRoot
     {
+        private readonly List<UserRole> _userRoles = [];
+
+
         #region Fields
 
         public string FirstName { get; private set; } = null!;
@@ -18,6 +22,12 @@ namespace Finervo.Core.Entities
         // Auth fields
         public string? RefreshToken { get; private set; }
         public DateTime? RefreshTokenExpiryTime { get; private set; }
+
+        #endregion
+
+        #region Navigation Properties
+
+        public IReadOnlyList<UserRole> UserRoles => _userRoles.AsReadOnly();
 
         #endregion
 
@@ -76,6 +86,21 @@ namespace Finervo.Core.Entities
             RefreshToken = null;
             RefreshTokenExpiryTime = null;
         }
+
+        public Result AssignRole(Guid roleId, Guid assignedBy)
+        {
+            if (_userRoles.Any(ur => ur.RoleId == roleId))
+                return Result.Failure(UserErrors.RoleAlreadyAssigned);
+
+            _userRoles.Clear(); // As of now we are not allowing multiple roles, so clear the existing one before assigning
+
+            _userRoles.Add(UserRole.Create(Id, roleId, assignedBy));
+
+            RaiseDomainEvent(new UserRoleAssignedDomainEvent(Id, roleId, assignedBy));
+
+            return Result.Success();
+        }
+
         #endregion
     }
 }

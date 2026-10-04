@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Finervo.Infrastructure.Persistence.Configurations
 {
-    internal class UserConfiguration : IEntityTypeConfiguration<User>
+    internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
