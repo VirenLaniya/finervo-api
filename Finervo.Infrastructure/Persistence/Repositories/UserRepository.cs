@@ -10,7 +10,10 @@ namespace Finervo.Infrastructure.Persistence.Repositories
 
         public async Task<User?> GetUserByEmailAsync(string email, CancellationToken ct = default)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email, ct);
+            return await _context.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.Email == email, ct);
         }
 
         public async Task<User?> GetUserByUserNameAsync(string username, CancellationToken ct = default)
@@ -26,6 +29,14 @@ namespace Finervo.Infrastructure.Persistence.Repositories
         public async Task<bool> ExistsByEmailAsync(string email, Guid? excludedUserId = null, CancellationToken ct = default)
         {
             return await _context.Users.AnyAsync(u => u.Email == email && (!excludedUserId.HasValue || u.Id != excludedUserId), ct);
+        }
+
+        public async Task<User?> GetByIdWithRolesAsync(Guid id, CancellationToken ct = default)
+        {
+            return await _context.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.Id == id, ct);
         }
     }
 }

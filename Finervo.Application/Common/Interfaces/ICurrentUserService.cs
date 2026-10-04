@@ -8,6 +8,9 @@ namespace Finervo.Application.Common.Interfaces
     {
         Guid? UserId { get; }
         string? Email { get; }
+        IReadOnlyList<string> Roles { get; }
+        bool IsInRole(string role);
+        bool IsSuperAdmin { get; }
         bool IsAuthenticated { get; }
     }
 }

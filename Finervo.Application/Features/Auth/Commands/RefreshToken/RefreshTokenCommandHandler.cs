@@ -28,7 +28,7 @@ namespace Finervo.Application.Features.Auth.Commands.RefreshToken
                 if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
                     return Result<RefreshTokenResponseDto>.Failure(UserErrors.InvalidRefreshToken);
 
-                var accessToken = tokenService.GenerateAccessToken(user);
+                var accessToken = tokenService.GenerateAccessToken(user, user.UserRoles.Select(ur => ur.Role!.Name));
                 var refreshToken = tokenService.GenerateRefreshToken();
 
                 user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(7));

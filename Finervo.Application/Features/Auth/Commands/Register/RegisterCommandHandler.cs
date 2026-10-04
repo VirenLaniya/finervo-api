@@ -5,11 +5,12 @@ using Finervo.Core.Interfaces.Persistence;
 using Finervo.Core.Interfaces.Repositories;
 using Finervo.Core.Interfaces.Security;
 using Finervo.Core.Primitives;
+using Finervo.Shared.Constants;
 using MediatR;
 
 namespace Finervo.Application.Features.Auth.Commands.Register
 {
-    public class RegisterCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork) : IRequestHandler<RegisterCommand, Result<UserResponseDto>>
+    public class RegisterCommandHandler(IUserRepository userRepository, IRoleRepository roleRepository, IPasswordHasher passwordHasher, IUnitOfWork unitOfWork) : IRequestHandler<RegisterCommand, Result<UserResponseDto>>
     {
         public async Task<Result<UserResponseDto>> Handle(RegisterCommand command, CancellationToken ct)
         {
@@ -38,6 +39,15 @@ namespace Finervo.Application.Features.Auth.Commands.Register
                     return Result<UserResponseDto>.Failure(newUserResult.Error);
 
                 var newUser = newUserResult.Data;
+
+                // Assign default role
+                var userRole = await roleRepository.GetByNameAsync(SystemRoles.User, ct);
+                if (userRole is null)
+                    return Result<UserResponseDto>.Failure(RoleErrors.NotFound);
+
+                var assignResult = newUser.AssignRole(userRole.Id, newUser.Id);
+                if (!assignResult.IsSuccess)
+                    return Result<UserResponseDto>.Failure(assignResult.Error);
 
                 //var accessToken = tokenService.GenerateAccessToken(newUser);
                 //var refreshToken = tokenService.GenerateRefreshToken();

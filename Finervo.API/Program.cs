@@ -1,5 +1,4 @@
 using Finervo.API.Shared.Extensions;
-using Finervo.API.Shared.Middlewares;
 using Serilog;
 
 Log.Logger = new Serilog.LoggerConfiguration()
@@ -44,7 +43,9 @@ try
 
     #endregion
 
-    app.Run();
+    await app.SeedDatabaseAsync();
+
+    await app.RunAsync();
 } 
 catch(Exception ex)
 {

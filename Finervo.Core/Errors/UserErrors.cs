@@ -30,5 +30,14 @@ namespace Finervo.Core.Errors
 
         public static readonly Error RefreshTokenExpired =
             Error.Unauthorized("User.RefreshTokenExpired", "Refresh token has expired, please login again");
+
+        public static readonly Error RoleAlreadyAssigned =
+            Error.Conflict("User.RoleAlreadyAssigned", "This role is already assigned to the user");
+
+        public static readonly Error RoleNotAssigned =
+            Error.BadRequest("User.RoleNotAssigned", "This role is not assigned to the user");
+
+        public static readonly Error CannotRemoveLastSuperAdmin =
+            Error.BadRequest("User.CannotRemoveLastSuperAdmin", "Cannot remove SuperAdmin role — at least one SuperAdmin must exist");
     }
 }

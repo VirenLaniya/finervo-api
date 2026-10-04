@@ -13,7 +13,7 @@ namespace Finervo.Infrastructure.Authentication
     {
         private readonly JwtOptions _jwtOptions = options.Value;
 
-        public string GenerateAccessToken(User user)
+        public string GenerateAccessToken(User user, IEnumerable<string> roles)
         {
             var claims = new List<Claim>
             {
@@ -23,6 +23,8 @@ namespace Finervo.Infrastructure.Authentication
                 new(ClaimTypes.Name, user.UserName),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
