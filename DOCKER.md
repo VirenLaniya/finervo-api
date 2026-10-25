@@ -109,13 +109,11 @@ docker compose ps
 ```
 
 The API should be available at:
-
 ```text
 http://localhost:8080
 ```
 
 Swagger:
-
 ```text
 http://localhost:8080/docs/swagger
 ```
@@ -130,7 +128,30 @@ docker compose logs -f finervo.api
 
 Use this especially when troubleshooting startup, database connection, migrations, or application errors.
 
-## 4. Make Code Changes
+## 4. Debugging with Visual Studio 2026
+
+Since the Docker Compose orchestration project (`.dcproj`) is excluded from the solution explorer, you can debug your containerized code by attaching the Visual Studio debugger manually to the running container runtime.
+
+### Step 1: Start the container in Debug Mode
+Ensure your `docker-compose.override.yml` is passing the `BUILD_CONFIGURATION=Debug` argument, then spin up the environment in the background:
+```bash
+docker compose up --build -d
+```
+
+### Step 2: Attach the Visual Studio Debugger
+1. Open your `Finervo.slnx` solution in **Visual Studio 2026**.
+2. Set your breakpoints in the source code.
+3. Open the menu: **Debug** > **Attach to Process...** (or press `Ctrl + Alt + P`).
+4. Change the **Connection type** drop-down to **Docker (Linux Container)**.
+5. Click the **Browse...** button next to *Connection target*.
+6. From the list, select your running API container (e.g., `finervo-api`).
+7. In the process grid below, look for the **`dotnet`** process (the row where the command line matches `Finervo.API.dll`).
+8. Ensure **Attach to:** at the bottom says **Managed (.NET Core for Unix)** or automatic.
+9. Click **Attach**. 
+
+> 💡 **Tip:** If the debugger warns about lack of symbols, verify that your Dockerfile isn't hardcoded to a `Release` configuration and that the `appsettings.Development.json` is correctly mounted via your compose overrides.
+
+## 5. Make Code Changes
 
 During development:
 
@@ -149,9 +170,9 @@ If the containers are already running and you only need to restart the API:
 docker compose restart finervo.api
 ```
 
-> Note: `restart` does not rebuild the image. Use `docker compose up --build` after changing application code that is baked into the image.
+> Note: `restart` does not rebuild the image. Use `docker compose up --build` after changing application code that is baked into the image. After rebuilding and restarting, repeat the **Attach to Process** steps to re-engage your debugger session.
 
-## 5. Database / Infrastructure Changes
+## 6. Database / Infrastructure Changes
 
 When changing PostgreSQL or other infrastructure configuration, rebuild/start normally:
 
@@ -168,7 +189,7 @@ docker compose up --build
 
 > `down -v` deletes Docker volumes. For PostgreSQL, this means the database data stored in that volume will be deleted.
 
-## 6. Troubleshooting
+## 7. Troubleshooting
 
 ### API is not starting
 
@@ -218,13 +239,15 @@ docker compose up --build
 
 # Common Daily Workflow
 
-For normal development, this is usually enough:
+For normal development with debugging active, this workflow is ideal:
 
 ```bash
-# Start / rebuild
-docker compose up --build
+# 1. Start up your stack cleanly in the background
+docker compose up --build -d
 
-# In another terminal, monitor logs
+# 2. Open Visual Studio 2026 -> Ctrl + Alt + P -> Select container -> Attach to 'dotnet'
+
+# 3. In a side terminal window, actively track standard output text logs
 docker compose logs -f finervo.api
 ```
 
@@ -234,18 +257,11 @@ When finished:
 docker compose down
 ```
 
-For background development:
-
-```bash
-docker compose up --build -d
-docker compose logs -f finervo.api
-```
-
 ---
 
 # Quick Reference
 
-| Task | Command |
+| Task | Command / Action |
 |---|---|
 | Start | `docker compose up` |
 | Start + rebuild | `docker compose up --build` |
@@ -259,4 +275,5 @@ docker compose logs -f finervo.api
 | Clean rebuild | `docker compose build --no-cache` |
 | Restart API | `docker compose restart finervo.api` |
 | API shell | `docker compose exec finervo.api sh` |
+| **Attach Debugger** | **VS 2026 -> `Ctrl + Alt + P` -> Linux Container -> target `dotnet`** |
 | Swagger | `http://localhost:8080/docs/swagger` |

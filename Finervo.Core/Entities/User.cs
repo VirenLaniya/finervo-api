@@ -1,13 +1,13 @@
 ﻿using Finervo.Core.Errors;
 using Finervo.Core.Events;
 using Finervo.Core.Primitives;
+using System.Security.Cryptography;
 
 namespace Finervo.Core.Entities
 {
     public class User : AggregateRoot
     {
         private readonly List<UserRole> _userRoles = [];
-
 
         #region Fields
 
@@ -22,6 +22,10 @@ namespace Finervo.Core.Entities
         // Auth fields
         public string? RefreshToken { get; private set; }
         public DateTime? RefreshTokenExpiryTime { get; private set; }
+
+        public bool IsEmailVerified { get; private set; }
+        public string? EmailVerificationToken { get; private set; }
+        public DateTime? EmailVerificationTokenExpiry { get; private set; }
 
         #endregion
 
@@ -43,6 +47,9 @@ namespace Finervo.Core.Entities
             LastUpdatedAt = DateTime.UtcNow;
             RefreshToken = null;
             RefreshTokenExpiryTime = null;
+            IsEmailVerified = false;
+            EmailVerificationToken = null;
+            EmailVerificationTokenExpiry = null;
         }
         #endregion
 
@@ -51,11 +58,25 @@ namespace Finervo.Core.Entities
             string lastName,
             string email,
             string userName,
-            string passwordHash)
+            string passwordHash,
+            bool emailVerificationRequired = true)
         {
             var user = new User(Guid.NewGuid(), firstName, lastName, userName, email, passwordHash);
 
-            user.RaiseDomainEvent(new UserRegisteredDomainEvent(user.Id, user.Email));
+            if (emailVerificationRequired)
+            {
+                user.IsEmailVerified = false;
+                user.EmailVerificationToken = GenerateVerificationToken();
+                user.EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24); // Token valid for 24 hours
+
+                user.RaiseDomainEvent(new UserRegisteredDomainEvent(user.Id, user.Email, user.FirstName, user.EmailVerificationToken, (DateTime)user.EmailVerificationTokenExpiry));
+            }
+            else
+            {
+                user.IsEmailVerified = true;
+
+                user.RaiseDomainEvent(new UserCreatedDomainEvent(user.Id, user.Email));
+            }
 
             return Result<User>.Success(user);
         }
@@ -99,6 +120,63 @@ namespace Finervo.Core.Entities
             RaiseDomainEvent(new UserRoleAssignedDomainEvent(Id, roleId, assignedBy));
 
             return Result.Success();
+        }
+
+        public Result VerifyEmail(string token)
+        {
+            // Already verified
+            if (IsEmailVerified)
+                return Result.Failure(UserErrors.EmailAlreadyVerified);
+
+            // Token mismatch
+            if (EmailVerificationToken != token)
+                return Result.Failure(UserErrors.InvalidVerificationToken);
+
+            // Token expired
+            if (EmailVerificationTokenExpiry < DateTime.UtcNow)
+                return Result.Failure(UserErrors.VerificationTokenExpired);
+
+            IsEmailVerified = true;
+            EmailVerificationToken = null;
+            EmailVerificationTokenExpiry = null;
+            LastUpdatedAt = DateTime.UtcNow;
+
+            RaiseDomainEvent(new UserEmailVerifiedDomainEvent(Id, Email, FirstName));
+
+            return Result.Success();
+        }
+
+        public Result ResendVerification()
+        {
+            if (IsEmailVerified)
+                return Result.Failure(UserErrors.EmailAlreadyVerified);
+
+            EmailVerificationToken = GenerateVerificationToken();
+            EmailVerificationTokenExpiry = DateTime.UtcNow.AddHours(24);
+
+            RaiseDomainEvent(new UserVerificationResendDomainEvent(
+                Id,
+                Email,
+                FirstName,
+                EmailVerificationToken,
+                EmailVerificationTokenExpiry.Value));
+
+            return Result.Success();
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        private static string GenerateVerificationToken()
+        {
+            var bytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes)
+                .Replace("+", "-")
+                .Replace("/", "_")
+                .Replace("=", "");   // ← URL safe base64
         }
 
         #endregion

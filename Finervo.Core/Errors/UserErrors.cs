@@ -39,5 +39,17 @@ namespace Finervo.Core.Errors
 
         public static readonly Error CannotRemoveLastSuperAdmin =
             Error.BadRequest("User.CannotRemoveLastSuperAdmin", "Cannot remove SuperAdmin role — at least one SuperAdmin must exist");
+
+        public static readonly Error EmailAlreadyVerified =
+            Error.BadRequest("User.EmailAlreadyVerified", "Email address is already verified");
+
+        public static readonly Error InvalidVerificationToken =
+            Error.BadRequest("User.InvalidVerificationToken", "Verification token is invalid");
+
+        public static readonly Error VerificationTokenExpired =
+            Error.BadRequest("User.VerificationTokenExpired", "Verification token has expired. Please request a new one");
+
+        public static readonly Error EmailNotVerified =
+            Error.Unauthorized("User.EmailNotVerified", "Please verify your email address before logging in. Check your inbox for the verification link.");
     }
 }

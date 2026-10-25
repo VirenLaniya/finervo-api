@@ -5,6 +5,7 @@ using Finervo.Core.Interfaces.Security;
 using Finervo.Infrastructure.Authentication;
 using Finervo.Infrastructure.Configuration;
 using Finervo.Infrastructure.Persistence;
+using Finervo.Infrastructure.Persistence.Interceptors;
 using Finervo.Infrastructure.Persistence.Repositories;
 using Finervo.Infrastructure.Persistence.Security;
 using Finervo.Infrastructure.Services;
@@ -38,7 +39,9 @@ namespace Finervo.Infrastructure
         {
             var connectionString = configuration.GetConnectionString("Postgres");
 
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddScoped<PublishDomainEventsInterceptor>();
+
+            services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
                 options
                     .UseNpgsql(connectionString, npgsql =>
@@ -53,6 +56,10 @@ namespace Finervo.Infrastructure
                         npgsql.MigrationsAssembly(
                             typeof(ApplicationDbContext).Assembly.FullName);
                     });
+
+                options.AddInterceptors(
+                    sp.GetRequiredService<PublishDomainEventsInterceptor>());
+
                 // Log SQL queries in development
                 if (environment.IsDevelopment())
                 {
@@ -126,6 +133,8 @@ namespace Finervo.Infrastructure
         {
             services.AddScoped<IRequestContext, RequestContext>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IClientUrlService, ClientUrlService>();
 
             return services;
         }
@@ -133,6 +142,8 @@ namespace Finervo.Infrastructure
         private static IServiceCollection AddConfigurationOptions(this IServiceCollection services)
         {
             services.AddOptions<DefaultSuperAdminOptions>().BindConfiguration(DefaultSuperAdminOptions.SectionName).ValidateOnStart();
+            services.AddOptions<SmtpOptions>().BindConfiguration(SmtpOptions.SectionName).ValidateOnStart();
+            services.AddOptions<ClientOptions>().BindConfiguration(ClientOptions.SectionName).ValidateOnStart();
 
             return services;
         }

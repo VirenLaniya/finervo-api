@@ -1,5 +1,4 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
+# See https://aka.ms/customizecontainer to learn how to customize your debug container
 # ─── Stage 1: Restore ─────────────────────────────────────────-
 # Separate restore stage for better layer caching
 # Restore only runs again if .csproj files change
@@ -26,27 +25,28 @@ WORKDIR /src
 # .dockerignore excludes: bin/, obj/, appsettings.*.Development.json etc
 COPY . .
 
-# Build
+# Dynamic build configuration variable (Defaults to Debug for terminal runs)
+ARG BUILD_CONFIGURATION=Debug
 RUN dotnet build Finervo.API/Finervo.API.csproj \
-    --configuration Release \
+    --configuration $BUILD_CONFIGURATION \
     --no-restore
 
 # ─── Stage 3: Publish ─────────────────────────────────────────
 FROM build AS publish
 WORKDIR /src
 
+ARG BUILD_CONFIGURATION=Debug
 RUN dotnet publish Finervo.API/Finervo.API.csproj \
-    --configuration Release \
+    --configuration $BUILD_CONFIGURATION \
     --no-restore \
     --no-build \
     --output /app/publish \
     /p:UseAppHost=false    # Reduces image size, not needed inside Linux container
 
-# ─── Stage 4: Runtime ─────────────────────────────────────────
+# ─── Stage 4: Runtime / Base Setup ────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
-# Environment variables — best practices for .NET in containers
 ENV DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
     ASPNETCORE_URLS=http://+:8080 \
@@ -60,10 +60,7 @@ ENV DOTNET_RUNNING_IN_CONTAINER=true \
 RUN mkdir -p /app/logs && \
     chown -R app:app /app
 
-# Copy published output from publish stage
-COPY --from=publish --chown=app:app /app/publish .
-
-# Aspnet image does not contain curl by default - install explicitly as root
+# Install curl safely as root before dropping privileges
 RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
@@ -81,11 +78,8 @@ HEALTHCHECK --interval=30s \
             --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
-ENTRYPOINT ["dotnet", "Finervo.API.dll"]
-
-# ─── Stage 5: Final (VS debugging support) ────────────────────
-# When running normally this stage is skipped
-# VS uses this as the target when debugging in container
+# ─── Stage 5: Final Production & Manual Debug Entrypoint ──────
 FROM runtime AS final
 WORKDIR /app
 COPY --from=publish --chown=app:app /app/publish .
+ENTRYPOINT ["dotnet", "Finervo.API.dll"]

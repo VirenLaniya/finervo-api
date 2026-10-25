@@ -21,6 +21,9 @@ namespace Finervo.Application.Features.Auth.Commands.Login
                 if (user is null || !passwordHasher.Verify(command.Password, user.Password))
                     return Result<LoginResponseDto>.Failure(UserErrors.InvalidCredentials);
 
+                if (!user.IsEmailVerified)
+                    return Result<LoginResponseDto>.Failure(UserErrors.EmailNotVerified);
+
                 var accessToken = tokenService.GenerateAccessToken(user, user.UserRoles.Select(ur => ur.Role!.Name));
                 var refreshToken = tokenService.GenerateRefreshToken();
 

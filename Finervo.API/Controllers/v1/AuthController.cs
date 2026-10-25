@@ -5,6 +5,8 @@ using Finervo.Application.Features.Auth.Commands.Login;
 using Finervo.Application.Features.Auth.Commands.Logout;
 using Finervo.Application.Features.Auth.Commands.RefreshToken;
 using Finervo.Application.Features.Auth.Commands.Register;
+using Finervo.Application.Features.Auth.Commands.ResendVerification;
+using Finervo.Application.Features.Auth.Commands.VerifyEmail;
 using Finervo.Contracts.Requests.Auth;
 using Finervo.Contracts.Responses.Auth;
 using Finervo.Contracts.Responses.User;
@@ -24,8 +26,7 @@ namespace Finervo.API.Controllers.v1
         [HttpPost("register")]
         [EndpointName("Register")]
         [EndpointSummary("Create a new user account")]
-        [EndpointDescription("Registers a new user. Returns user details with id if the operation was successful.")]
-        // TO DO : Uncomment if verify email enabled -[EndpointDescription("Registers a new user and sends an email verification link. The account remains inactive until the email address is verified.")]
+        [EndpointDescription("Registers a new user and sends an email verification link. The account remains inactive until the email address is verified.")]
         [ProducesResponseType(typeof(Result<UserResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(Result<object>), StatusCodes.Status409Conflict)]
@@ -38,11 +39,38 @@ namespace Finervo.API.Controllers.v1
             return HandleResult(result);
         }
 
+        [HttpGet("verify-email")]
+        [AllowAnonymous]
+        [EndpointName("VerifyEmail")]
+        [EndpointSummary("Verify email address")]
+        [EndpointDescription("Activates user account using the token sent to their email. Token expires after 24 hours.")]
+        [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<object>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> VerifyEmail([FromQuery] Guid userId, [FromQuery] string token, CancellationToken ct)
+        {
+            var result = await Sender.Send(new VerifyEmailCommand(userId, token), ct);
+
+            return HandleResult(result);
+        }
+
+        [HttpPost("resend-verification")]
+        [AllowAnonymous]
+        [EndpointName("ResendVerification")]
+        [EndpointSummary("Resend email verification link")]
+        [EndpointDescription("Generates a new verification token and resends the verification email. Always returns success to prevent email enumeration.")]
+        [ProducesResponseType(typeof(Result<object>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(Result<object>), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ResendVerification([FromBody] ResendVerificationRequestDto request, CancellationToken ct)
+        {
+            var result = await Sender.Send(new ResendVerificationCommand(request.Email), ct);
+
+            return HandleResult(result);
+        }
+
         [HttpPost("login")]
         [EndpointName("Login")]
         [EndpointSummary("Authenticate and obtain access tokens")]
-        [EndpointDescription("Validates user credentials and returns a short-lived access token and a long-lived refresh token.")]
-        // TO DO : Uncomment if verify email enabled - [EndpointDescription("Validates user credentials and returns a short-lived access token and a long-lived refresh token. Email must be verified before login is permitted.")]
+        [EndpointDescription("Validates user credentials and returns a short-lived access token and a long-lived refresh token. Email must be verified before login is permitted.")]
         [ProducesResponseType(typeof(Result<LoginResponseDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Result<object>), StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(Result<object>), StatusCodes.Status400BadRequest)]

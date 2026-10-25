@@ -66,6 +66,19 @@ namespace Finervo.Infrastructure.Persistence.Configurations
             builder.Property(u => u.LastUpdatedAt)
                 .HasColumnName("last_updated")
                 .IsRequired();
+
+            builder.Property(r => r.IsEmailVerified)
+                .HasColumnName("is_email_verified")
+                .HasDefaultValue(false);
+
+            builder.Property(u => u.EmailVerificationToken)
+                .HasColumnName("email_verification_token")
+                .HasMaxLength(128)
+                .IsRequired(false);
+
+            builder.Property(u => u.EmailVerificationTokenExpiry)
+                .HasColumnName("email_verification_token_expiry")
+                .IsRequired(false);
         }
     }
 }

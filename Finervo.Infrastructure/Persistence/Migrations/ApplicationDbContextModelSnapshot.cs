@@ -85,11 +85,26 @@ namespace Finervo.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("email");
 
+                    b.Property<string>("EmailVerificationToken")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("email_verification_token");
+
+                    b.Property<DateTime?>("EmailVerificationTokenExpiry")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("email_verification_token_expiry");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("first_name");
+
+                    b.Property<bool>("IsEmailVerified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_email_verified");
 
                     b.Property<string>("LastName")
                         .IsRequired()
