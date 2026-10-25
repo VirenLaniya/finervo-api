@@ -30,7 +30,8 @@ namespace Finervo.Application.Features.Admin.User.Commands.AddUser
                     lastName: command.LastName,
                     email: command.Email,
                     userName: command.UserName,
-                    passwordHash: passwordHash
+                    passwordHash: passwordHash,
+                    emailVerificationRequired: false    // Email verification is not required for admin-created users
                 );
 
                 if (!newUserResult.IsSuccess)

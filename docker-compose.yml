@@ -51,6 +51,9 @@ services:
       # Seq
       Seq__ServerUrl: ${SEQ_SERVER_URL}
       Seq__Enabled: ${SEQ_ENABLED}
+      # SMTP
+      Smtp__Username: ${SMTP_USERNAME}
+      Smtp__Password: ${SMTP_PASSWORD}
     ports:
       - "8080:8080" # host:container - access via http://localhost:8080
     depends_on:
