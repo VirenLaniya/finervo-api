@@ -1,4 +1,11 @@
 <Solution>
+  <Folder Name="/tests/">
+    <Project Path="Finervo.ApiTests/Finervo.ApiTests.csproj" Id="aa4526e7-cf10-4c30-96cd-238c6467c920" />
+    <Project Path="Finervo.ArchitectureTests/Finervo.ArchitectureTests.csproj" Id="748868b2-04a5-4473-bc4e-4c4fab2126fa" />
+    <Project Path="Finervo.ContractTests/Finervo.ContractTests.csproj" Id="77162730-36f8-476f-82d9-fea9f752507f" />
+    <Project Path="Finervo.IntegrationTests/Finervo.IntegrationTests.csproj" Id="46cfab41-12a3-4bc6-8f49-b23e283ad9d8" />
+    <Project Path="Finervo.UnitTests/Finervo.UnitTests.csproj" Id="766a9395-37ed-4821-8f77-5f42735713bb" />
+  </Folder>
   <Project Path="Finervo.API/Finervo.API.csproj" />
   <Project Path="Finervo.Application/Finervo.Application.csproj" />
   <Project Path="Finervo.Contracts/Finervo.Contracts.csproj" Id="3eb18801-c8cd-42fb-8596-4d5fb0f52ead" />
